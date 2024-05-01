@@ -4,15 +4,15 @@
 # Fedora 39, 40
 #-----------------------------------------------------------------------------#
 
-# Setup Variables
-TMP=~/Downloads/tmp
-INSTALL=/usr/lib64
+# Find current Discord install
+INSTALL=`readlink -f `which Discord` | xargs dirname | sed 's/\/discord//'`
 
 # Find file
 FILE=`find ~/Downloads -type f -iname "discord*.tar.gz" | sort | tail -n1`
 echo "Found: $FILE"
 
 # Setup Dir
+TMP=~/Downloads/tmp
 if [ ! -d "$TMP" ]; then
     mkdir "$TMP"
 fi
@@ -23,8 +23,11 @@ mv "$TMP/Discord" "$TMP/discord"
 
 # Move files
 if [ -d "$INSTALL" ]; then
+    echo "Found install at $INSTALL"
     if [ -d "$INSTALL/discordBAK" ]; then
+        # Unknown if the following line is necessary
         sudo chmod -R 777 "$INSTALL/discordBAK"
+        # Not sure if -f is needed
         sudo rm -rf "$INSTALL/discordBAK"
     fi
     sudo mv "$INSTALL/discord" "$INSTALL/discordBAK"
