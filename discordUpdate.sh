@@ -4,9 +4,6 @@
 # Fedora 39, 40
 #-----------------------------------------------------------------------------#
 
-# Find current Discord install
-INSTALL=`readlink -f `which Discord` | xargs dirname | sed 's/\/discord//'`
-
 # Find file
 FILE=`find ~/Downloads -type f -iname "discord*.tar.gz" | sort | tail -n1`
 echo "Found: $FILE"
@@ -21,18 +18,31 @@ fi
 tar -xzf $FILE -C $TMP
 mv "$TMP/Discord" "$TMP/discord"
 
-# Move files
-if [ -d "$INSTALL" ]; then
-    echo "Found install at $INSTALL"
-    if [ -d "$INSTALL/discordBAK" ]; then
-        # Unknown if the following line is necessary
-        sudo chmod -R 777 "$INSTALL/discordBAK"
-        # Not sure if -f is needed
-        sudo rm -rf "$INSTALL/discordBAK"
-    fi
-    sudo mv "$INSTALL/discord" "$INSTALL/discordBAK"
-    sudo cp -r "$TMP/discord" "$INSTALL"
+# Find current Discord install
+APP=`which Discord`
+if [ -h "$APP" ]; then
+  INSTALL=`readlink -f "$APP" | xargs dirname | sed 's/\/discord//'`
+  else
+  INSTALL=`echo "$APP" | xargs dirname | sed 's/\/discord//'`
 fi
+
+if [ -d "$INSTALL" ]; then
+  echo "Found install at $INSTALL"
+  if [ -d "$INSTALL/discordBAK" ]; then
+    # Unknown if the following line is necessary
+    sudo chmod -R 777 "$INSTALL/discordBAK"
+    # Not sure if -f is needed
+    sudo rm -rf "$INSTALL/discordBAK"
+  fi
+  sudo mv "$INSTALL/discord" "$INSTALL/discordBAK"
+  else
+    sudo mkdir /usr/lib64/discord
+    INSTALL=/usr/lib64
+    sudo ln -s "$INSTALL"/discord/Discord /usr/bin/Discord
+fi
+
+# Move files
+sudo cp -r "$TMP/discord" "$INSTALL"
 
 # Cleanup
 rm -r "$TMP"
